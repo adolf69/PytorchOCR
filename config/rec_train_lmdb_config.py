@@ -27,14 +27,14 @@ config = Dict()
 config.exp_name = 'CRNN'
 config.train_options = {
     # for train
-    'resume_from': '', # 继续训练地址
-    'third_party_name': '', # 加载paddle模型可选
-    'checkpoint_save_dir': f"./output/{config.exp_name}/checkpoint", # 模型保存地址，log文件也保存在这里
+    'resume_from': '',  # 继续训练地址
+    'third_party_name': '',  # 加载paddle模型可选
+    'checkpoint_save_dir': f"./output/{config.exp_name}/checkpoint",  # 模型保存地址，log文件也保存在这里
     'device': 'cuda:0',# 不建议修改
     'epochs': 200,
     'fine_tune_stage': ['backbone', 'neck', 'head'],
     'print_interval': 10,  # step为单位
-    'val_interval': 300,  # step为单位
+    'val_interval': 625,  # step为单位
     'ckpt_save_type': 'HighestAcc',  # HighestAcc：只保存最高准确率模型 ；FixedEpochStep：每隔ckpt_save_epoch个epoch保存一个
     'ckpt_save_epoch': 4,  # epoch为单位, 只有ckpt_save_type选择FixedEpochStep时，该参数才有效
 }
@@ -71,8 +71,8 @@ config.dataset = {
     'alphabet': r'torchocr/datasets/alphabets/digit.txt',
     'train': {
         'dataset': {
-            'type': 'RecTextLineDataset',
-            'file': r'path/train.txt',
+            'type': 'RecLmdbDataset',
+            'file': r'path/lmdb/train',  # LMDB 数据集路径
             'input_h': 32,
             'mean': 0.5,
             'std': 0.5,
@@ -91,8 +91,8 @@ config.dataset = {
     },
     'eval': {
         'dataset': {
-            'type': 'RecTextLineDataset',
-            'file': r'path/eval.txt',
+            'type': 'RecLmdbDataset',
+            'file': r'path/lmdb/eval',  # LMDB 数据集路径
             'input_h': 32,
             'mean': 0.5,
             'std': 0.5,
@@ -103,10 +103,6 @@ config.dataset = {
             'batch_size': 4,
             'shuffle': False,
             'num_workers': 1,
-            'collate_fn': {
-                'type': 'RecCollateFn',
-                'img_w': 120
-            }
         }
     }
 }

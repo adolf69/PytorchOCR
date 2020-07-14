@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import logging
+import os
+import torch
 from torch import nn
 from torchocr.networks.CommonModules import ConvBNACT, SEBlock
 
@@ -46,7 +49,7 @@ class ResidualUnit(nn.Module):
 
 
 class MobileNetV3(nn.Module):
-    def __init__(self, in_channels, **kwargs):
+    def __init__(self, in_channels, pretrained=True, **kwargs):
         """
         the MobilenetV3 backbone network for detection module.
         Args:
@@ -144,6 +147,15 @@ class MobileNetV3(nn.Module):
             groups=1,
             act='hard_swish')
         self.out_channels.append(self.make_divisible(scale * cls_ch_squeeze))
+
+        if pretrained:
+            ckpt_path = f'./weights/MobileNetV3_{model_name}_x{str(scale).replace(".", "_")}.pth'
+            logger = logging.getLogger('torchocr')
+            if os.path.exists(ckpt_path):
+                logger.info('load imagenet weights')
+                self.load_state_dict(torch.load(ckpt_path))
+            else:
+                logger.info(f'{ckpt_path} not exists')
 
     def make_divisible(self, v, divisor=8, min_value=None):
         if min_value is None:

@@ -6,11 +6,11 @@ from torch import nn
 
 from torchocr.networks.backbones.DetMobilenetV3 import MobileNetV3
 from torchocr.networks.backbones.DetResNetvd import ResNet
-from torchocr.networks.necks.FeaturePyramidNetwork import FeaturePyramidNetwork
+from torchocr.networks.necks.FPN import FPN
 from torchocr.networks.heads.DetDbHead import DBHead
 
 backbone_dict = {'MobileNetV3': MobileNetV3, 'ResNet': ResNet}
-neck_dict = {'FPN': FeaturePyramidNetwork}
+neck_dict = {'FPN': FPN}
 head_dict = {'DBHead': DBHead}
 
 
@@ -30,7 +30,7 @@ class DetModel(nn.Module):
         assert head_type in head_dict, f'head.type must in {head_dict}'
         self.head = head_dict[head_type](self.neck.out_channels, **config.head)
 
-        self.name = f'{backbone_type}_{neck_type}_{head_type}'
+        self.name = f'DetModel_{backbone_type}_{neck_type}_{head_type}'
 
     def load_3rd_state_dict(self, _3rd_name, _state):
         self.backbone.load_3rd_state_dict(_3rd_name, _state)
@@ -45,17 +45,13 @@ class DetModel(nn.Module):
 
 
 if __name__ == '__main__':
-    # from torchocr.model_config import AttrDict
     import torch
 
     db_config = AttrDict(
         in_channels=3,
-        backbone=AttrDict(type='MobileNetV3', scale=0.5, model_name='large'),
+        backbone=AttrDict(type='MobileNetV3', layers=50, model_name='large',pretrained=True),
         neck=AttrDict(type='FPN', out_channels=256),
         head=AttrDict(type='DBHead')
     )
     x = torch.zeros(1, 3, 640, 640)
     model = DetModel(db_config)
-    y = model(x)
-    print(model.name)
-    print(y.shape)
